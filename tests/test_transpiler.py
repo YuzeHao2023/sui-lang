@@ -8,25 +8,25 @@ import subprocess
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sui2py import SuiToPythonTranspiler
+from sui2py import Sui2PyTranspiler
 
 
 class TestSui2Py:
     """Test Sui to Python transpiler"""
 
     def test_assignment(self):
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         code = transpiler.transpile("= g0 42\n. g0")
         assert "g[0] = 42" in code
         assert "print(g[0])" in code
 
     def test_arithmetic(self):
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         code = transpiler.transpile("+ v0 10 20")
         assert "v[0] = 10 + 20" in code
 
     def test_function(self):
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         code = transpiler.transpile("# 0 1 {\n^ a0\n}")
         assert "def f_0" in code
         assert "return" in code
@@ -51,7 +51,7 @@ $ v5 0 v4
 $ g1 0 g0
 . g1
 """
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         python_code = transpiler.transpile(sui_code)
         
         # Execute the transpiled code
@@ -90,7 +90,7 @@ class TestSui2PyControlFlow:
 : 1
 . v0
 """
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         python_code = transpiler.transpile(sui_code)
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
@@ -122,7 +122,7 @@ class TestSui2PyArrays:
 ] v0 g0 1
 . v0
 """
-        transpiler = SuiToPythonTranspiler()
+        transpiler = Sui2PyTranspiler()
         python_code = transpiler.transpile(sui_code)
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
