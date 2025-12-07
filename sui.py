@@ -465,26 +465,27 @@ def validate_line(line: str) -> tuple[bool, str]:
     return True, ""
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Sui (粋) - Programming Language for LLMs")
-        print("=" * 50)
-        print("")
-        print("Usage:")
-        print("  sui <file.sui> [args...]")
-        print("  sui --validate <file.sui>")
-        print("")
-        print("Argument access:")
-        print("  g100 = argument count (argc)")
-        print("  g101 = first argument")
-        print("  g102 = second argument")
-        print("  ...")
-        print("")
-        print("Sample execution:")
-        print("-" * 50)
+def _print_help():
+    print("Sui (粋) - Programming Language for LLMs")
+    print("=" * 50)
+    print("")
+    print("Usage:")
+    print("  sui                 # Start REPL (default when no args)")
+    print("  sui <file.sui> [args...]")
+    print("  sui --help          # Show this help")
+    print("  sui --validate <file.sui>")
+    print("")
+    print("Argument access:")
+    print("  g100 = argument count (argc)")
+    print("  g101 = first argument")
+    print("  g102 = second argument")
+    print("  ...")
+    print("")
+    print("Sample execution:")
+    print("-" * 50)
 
-        # Fibonacci sample
-        fib_code = """
+    # Fibonacci sample
+    fib_code = """
 ; Fibonacci function
 # 0 1 {
   < v0 a0 2
@@ -506,18 +507,18 @@ $ g1 0 g0
 . g1
 """
 
-        print("Sui (Fibonacci):")
-        print(fib_code.strip())
-        print("")
-        print("Result:")
-        interp = SuiInterpreter()
-        interp.run(fib_code)
+    print("Sui (Fibonacci):")
+    print(fib_code.strip())
+    print("")
+    print("Result:")
+    interp = SuiInterpreter()
+    interp.run(fib_code)
 
-        print("")
-        print("-" * 50)
+    print("")
+    print("-" * 50)
 
-        # Loop sample
-        loop_code = """
+    # Loop sample
+    loop_code = """
 = v0 0
 : 0
 < v1 v0 10
@@ -529,26 +530,22 @@ $ g1 0 g0
 : 1
 """
 
-        print("Sui (0-9 Loop):")
-        print(loop_code.strip())
-        print("")
-        print("Result:")
-        interp = SuiInterpreter()
-        interp.run(loop_code)
+    print("Sui (0-9 Loop):")
+    print(loop_code.strip())
+    print("")
+    print("Result:")
+    interp = SuiInterpreter()
+    interp.run(loop_code)
+    print("")
+    print("-" * 50)
 
-        print("")
-        print("-" * 50)
-        print("")
-        print("Features of Sui:")
-        print("")
-        print("✓ Minimal bracket matching (only {} for functions)")
-        print("✓ Line-by-line validation possible")
-        print("✓ Error localization by line number")
-        print("✓ Maximum token efficiency")
 
+def main():
+    args = sys.argv[1:]
+    if args[0] in ('--help', '-h'):
+        _print_help()
         return
 
-    args = sys.argv[1:]
     if args[0] == '--validate':
         # Validation mode
         with open(args[1], 'r') as f:
@@ -567,17 +564,23 @@ $ g1 0 g0
             sys.exit(1)
         else:
             print("✓ Validation successful")
+            return
 
-    else:
-        # Execution mode
-        with open(args[0], 'r') as f:
-            code = f.read()
+    # Unknown option -> fallback to help
+    if args[0].startswith('-'):
+        print(f"Unknown option: {args[0]}", file=sys.stderr)
+        _print_help()
+        sys.exit(1)
 
-        # Pass additional arguments to the program
-        program_args = args[1:]
+    # Execution mode
+    with open(args[0], 'r') as f:
+        code = f.read()
 
-        interp = SuiInterpreter()
-        interp.run(code, args=program_args)
+    # Pass additional arguments to the program
+    program_args = args[1:]
+
+    interp = SuiInterpreter()
+    interp.run(code, args=program_args)
 
 
 if __name__ == '__main__':
