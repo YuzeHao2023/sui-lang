@@ -112,9 +112,8 @@ py2sui your_code.py -o output.sui
 ### WebAssembly
 
 ```bash
-# WebAssembly Text Format (WAT) に変換
-sui2wat examples/fibonacci.sui
-sui2wat examples/fibonacci.sui -o fib.wat
+# WebAssemblyバイナリにコンパイル（要: brew install wabt）
+sui2wasm examples/fibonacci.sui -o fib.wasm
 
 # WebAssemblyで直接実行（要: pip install sui-lang[wasm]）
 suiwasm examples/fibonacci.sui
@@ -277,7 +276,7 @@ sui/
 ├── LICENSE             # MITライセンス
 ├── sui.py              # インタプリタ
 ├── sui2py.py           # Sui → Python トランスパイラ
-├── sui2wat.py          # Sui → WebAssembly Text Format トランスパイラ
+├── sui2wasm.py         # Sui → WebAssemblyバイナリ コンパイラ
 ├── suiwasm.py          # WebAssemblyランタイム（wasmtimeで実行）
 ├── py2sui.py           # Python → Sui トランスパイラ（人間向け）
 ├── examples/

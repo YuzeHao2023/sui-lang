@@ -35,7 +35,7 @@ Issues = "https://github.com/TakatoHonda/sui-lang/issues"
 [project.scripts]
 sui = "sui:main"
 sui2py = "sui2py:main"
-sui2wat = "sui2wat:main"
+sui2wasm = "sui2wasm:main"
 suiwasm = "suiwasm:main"
 py2sui = "py2sui:main"
 
@@ -49,7 +49,7 @@ wasm = [
 ]
 
 [tool.setuptools]
-py-modules = ["sui", "sui2py", "sui2wat", "suiwasm", "py2sui"]
+py-modules = ["sui", "sui2py", "sui2wat", "sui2wasm", "suiwasm", "py2sui"]
 
 [tool.setuptools.packages.find]
 where = ["."]
