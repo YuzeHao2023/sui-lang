@@ -44,6 +44,9 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
 ]
+wasm = [
+    "wasmtime>=39.0",
+]
 
 [tool.setuptools]
 py-modules = ["sui", "sui2py", "sui2wat", "suiwasm", "py2sui"]
