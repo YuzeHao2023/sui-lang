@@ -4,6 +4,13 @@
 
 [English README](README.md)
 
+## 🚀 今すぐ試す
+
+**インストール不要** - ブラウザで直接Suiを試せる：
+
+- **[Sui Playground](https://takatohonda.github.io/sui-lang/playground/)** - Suiコードを即座に実行
+- **[Counter Demo](https://takatohonda.github.io/sui-lang/examples/counter_app/)** - Sui + WebAssemblyの実例
+
 ## 概要
 
 **粋 (Sui)** は「洗練」「無駄を削ぎ落とす」という日本語の美意識から名付けられた、LLMが**100%正確なコード**を生成できるように設計されたプログラミング言語である。希望的観測ではなく、構造的保証によって実現する。

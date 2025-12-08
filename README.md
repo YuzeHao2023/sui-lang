@@ -4,6 +4,13 @@
 
 [日本語版 README](README_ja.md)
 
+## 🚀 Try it Now
+
+**No installation required** - try Sui directly in your browser:
+
+- **[Sui Playground](https://takatohonda.github.io/sui-lang/playground/)** - Write and run Sui code instantly
+- **[Counter Demo](https://takatohonda.github.io/sui-lang/examples/counter_app/)** - See Sui + WebAssembly in action
+
 ## Overview
 
 **Sui (粋)** is a programming language named after the Japanese aesthetic concept meaning "refined" and "elimination of excess." It is designed so that LLMs can generate **100% accurate code** - not through hope, but through structural guarantees.
