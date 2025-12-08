@@ -259,7 +259,8 @@ sui/
 │   ├── fib_args.sui
 │   ├── fizzbuzz.sui
 │   ├── list_sum.sui
-│   └── args_demo.sui
+│   ├── args_demo.sui
+│   └── counter_app/      # Full app example (Sui + Wasm + HTML)
 └── prompts/
     ├── system_prompt_en.md  # LLM system prompt (English)
     ├── system_prompt_ja.md  # LLM system prompt (Japanese)

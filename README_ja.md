@@ -284,7 +284,8 @@ sui/
 │   ├── fib_args.sui
 │   ├── fizzbuzz.sui
 │   ├── list_sum.sui
-│   └── args_demo.sui
+│   ├── args_demo.sui
+│   └── counter_app/      # 完全なアプリ例（Sui + Wasm + HTML）
 └── prompts/
     ├── system_prompt_en.md  # LLM用システムプロンプト（英語）
     ├── system_prompt_ja.md  # LLM用システムプロンプト（日本語）

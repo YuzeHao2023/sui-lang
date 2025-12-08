@@ -1,0 +1,28 @@
+; Counter App - Pure Sui Logic
+; 
+; Exports:
+;   g0     - counter state
+;   f0()   - increment
+;   f1()   - decrement
+;   f2()   - reset
+
+= g0 0
+
+; f0: increment
+# 0 0 {
+  + g0 g0 1
+  ^ 0
+}
+
+; f1: decrement
+# 1 0 {
+  - g0 g0 1
+  ^ 0
+}
+
+; f2: reset
+# 2 0 {
+  = g0 0
+  ^ 0
+}
+

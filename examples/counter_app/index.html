@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sui Counter App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 2rem; color: #00d9ff; }
+    .counter {
+      font-size: 6rem;
+      font-weight: bold;
+      margin: 2rem 0;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+    }
+    .buttons { display: flex; gap: 1rem; }
+    button {
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    button:hover { transform: scale(1.05); }
+    .inc { background: #00d9ff; color: #1a1a2e; }
+    .dec { background: #ff6b6b; color: #fff; }
+    .reset { background: #4a4a6a; color: #fff; font-size: 1rem; padding: 0.5rem 1rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>粋 (Sui) Counter</h1>
+  <div class="counter" id="count">0</div>
+  <div class="buttons">
+    <button class="dec" id="dec">−</button>
+    <button class="inc" id="inc">+</button>
+  </div>
+  <button class="reset" id="reset">Reset</button>
+
+  <script type="module">
+    const wasmBytes = await fetch('logic.wasm').then(r => r.arrayBuffer());
+    const { instance } = await WebAssembly.instantiate(wasmBytes, {
+      env: { print_i32: console.log }
+    });
+    
+    const { f0, f1, f2, g0, main } = instance.exports;
+    const countEl = document.getElementById('count');
+    const update = () => countEl.textContent = g0.value;
+    
+    document.getElementById('inc').onclick = () => { f0(); update(); };
+    document.getElementById('dec').onclick = () => { f1(); update(); };
+    document.getElementById('reset').onclick = () => { f2(); update(); };
+    
+    main();
+    update();
+  </script>
+</body>
+</html>
+
