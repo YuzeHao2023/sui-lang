@@ -4,7 +4,7 @@
 
 [日本語版 README](README_ja.md)
 
-## 🚀 Try it Now
+## Try it Now
 
 **No installation required** - try Sui directly in your browser:
 
