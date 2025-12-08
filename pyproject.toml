@@ -35,6 +35,7 @@ Issues = "https://github.com/TakatoHonda/sui-lang/issues"
 [project.scripts]
 sui = "sui:main"
 sui2py = "sui2py:main"
+sui2wat = "sui2wat:main"
 py2sui = "py2sui:main"
 
 [project.optional-dependencies]
@@ -44,7 +45,7 @@ dev = [
 ]
 
 [tool.setuptools]
-py-modules = ["sui", "sui2py", "py2sui"]
+py-modules = ["sui", "sui2py", "sui2wat", "py2sui"]
 
 [tool.setuptools.packages.find]
 where = ["."]
