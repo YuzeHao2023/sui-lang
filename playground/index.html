@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sui Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1a1a;
+      --paper: #f5f2eb;
+      --accent: #c41e3a;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --code-bg: #fafaf8;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Zen Kaku Gothic New', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    header {
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 1px solid #e8e8e8;
+      background: white;
+    }
+    
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      color: var(--ink);
+    }
+    
+    .subtitle {
+      font-size: 0.7rem;
+      color: #999;
+      margin-top: 0.4rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    
+    header::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 1.25rem auto 0;
+    }
+    
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+    
+    .panel {
+      background: white;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px var(--shadow), 0 10px 40px var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .panel-header {
+      padding: 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: stretch;
+    }
+    
+    .panel-title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #666;
+      padding: 1rem 1.25rem;
+    }
+    
+    .tabs {
+      display: flex;
+      flex: 1;
+    }
+    
+    .tab {
+      padding: 1rem 1.25rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #999;
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover {
+      color: #666;
+    }
+    
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+    
+    #editor {
+      width: 100%;
+      height: 400px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      border: none;
+      resize: none;
+      background: var(--code-bg);
+      color: var(--ink);
+    }
+    
+    #editor:focus { outline: none; }
+    
+    .output-container {
+      flex: 1;
+      position: relative;
+      min-height: 400px;
+    }
+    
+    .output-panel {
+      position: absolute;
+      inset: 0;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      display: none;
+    }
+    
+    .output-panel.active {
+      display: block;
+    }
+    
+    #output {
+      background: var(--ink);
+      color: #e8e8e8;
+    }
+    
+    #python {
+      background: var(--code-bg);
+      color: var(--ink);
+    }
+    
+    .controls {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    button {
+      padding: 0.6rem 1.5rem;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 2px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    button:hover {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
+    }
+    
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    button.primary:hover {
+      background: #a01830;
+      border-color: #a01830;
+    }
+    
+    .status {
+      font-size: 0.75rem;
+      color: #2a9d8f;
+      margin-left: auto;
+    }
+    
+    .examples {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #eee;
+    }
+    
+    .examples-label {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+    
+    .examples-list {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .example-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.7rem;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.75rem;
+      color: #999;
+    }
+    
+    footer a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .shortcut {
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-left: 0.5rem;
+    }
+    
+    .keyword { color: #c41e3a; }
+    .string { color: #2a9d8f; }
+    .comment { color: #999; font-style: italic; }
+    .number { color: #6c5ce7; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sui Playground</h1>
+    <p class="subtitle">Sui Programming Language</p>
+  </header>
+  
+  <main>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Code</span>
+      </div>
+      <textarea id="editor" spellcheck="false">; Print 1 to 10
+= v0 1
+: 0
+> v1 v0 10
+? v1 1
+. v0
++ v0 v0 1
+@ 0
+: 1</textarea>
+      <div class="examples">
+        <div class="examples-label">Examples</div>
+        <div class="examples-list">
+          <button class="example-btn" data-example="hello">Hello</button>
+          <button class="example-btn" data-example="fibonacci">Fibonacci</button>
+          <button class="example-btn" data-example="fizzbuzz">FizzBuzz</button>
+          <button class="example-btn" data-example="factorial">Factorial</button>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="run" class="primary">Run</button>
+        <span class="shortcut">⌘+Enter</span>
+        <button id="clear">Clear</button>
+        <span class="status">Ready</span>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <div class="tabs">
+          <button class="tab active" data-tab="output">Output</button>
+          <button class="tab" data-tab="python">Python</button>
+        </div>
+      </div>
+      <div class="output-container">
+        <div id="output" class="output-panel active"></div>
+        <div id="python" class="output-panel"></div>
+      </div>
+    </div>
+  </main>
+  
+  <footer>
+    <a href="https://github.com/TakatoHonda/sui-lang">GitHub</a> · 
+    <a href="https://github.com/TakatoHonda/sui-lang#syntax">Syntax Reference</a> · 
+    Made with Sui
+  </footer>
+
+  <script>
+    // ===== Sui Interpreter (JavaScript) =====
+    class SuiInterpreter {
+      constructor() {
+        this.globals = {};
+        this.functions = {};
+        this.output = [];
+      }
+
+      resolve(token, locals, args) {
+        if (token.startsWith('"') && token.endsWith('"')) {
+          return token.slice(1, -1);
+        }
+        if (token.startsWith('v')) {
+          return locals[token] ?? 0;
+        }
+        if (token.startsWith('g')) {
+          return this.globals[token] ?? 0;
+        }
+        if (token.startsWith('a')) {
+          const idx = parseInt(token.slice(1));
+          return args[idx] ?? 0;
+        }
+        const num = parseFloat(token);
+        return isNaN(num) ? 0 : (Number.isInteger(num) ? parseInt(token) : num);
+      }
+
+      assign(varName, value, locals) {
+        if (varName.startsWith('g')) {
+          this.globals[varName] = value;
+        } else {
+          locals[varName] = value;
+        }
+      }
+
+      executeBlock(lines, locals = {}, args = []) {
+        const labels = {};
+        lines.forEach((tokens, i) => {
+          if (tokens[0] === ':') labels[tokens[1]] = i;
+        });
+
+        let pc = 0;
+        const maxIterations = 100000;
+        let iterations = 0;
+
+        while (pc < lines.length && iterations++ < maxIterations) {
+          const tokens = lines[pc];
+          if (!tokens || tokens.length === 0) { pc++; continue; }
+          
+          const op = tokens[0];
+          
+          if (op === ';' || op === ':') { pc++; continue; }
+          
+          switch (op) {
+            case '=':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args), locals);
+              break;
+            case '+':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) + this.resolve(tokens[3], locals, args), locals);
+              break;
+            case '-':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) - this.resolve(tokens[3], locals, args), locals);
+              break;
+            case '*':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) * this.resolve(tokens[3], locals, args), locals);
+              break;
+            case '/': {
+              const b = this.resolve(tokens[3], locals, args);
+              this.assign(tokens[1], b !== 0 ? Math.floor(this.resolve(tokens[2], locals, args) / b) : 0, locals);
+              break;
+            }
+            case '%': {
+              const b = this.resolve(tokens[3], locals, args);
+              this.assign(tokens[1], b !== 0 ? this.resolve(tokens[2], locals, args) % b : 0, locals);
+              break;
+            }
+            case '<':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) < this.resolve(tokens[3], locals, args) ? 1 : 0, locals);
+              break;
+            case '>':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) > this.resolve(tokens[3], locals, args) ? 1 : 0, locals);
+              break;
+            case '~':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) === this.resolve(tokens[3], locals, args) ? 1 : 0, locals);
+              break;
+            case '!':
+              this.assign(tokens[1], this.resolve(tokens[2], locals, args) ? 0 : 1, locals);
+              break;
+            case '&':
+              this.assign(tokens[1], (this.resolve(tokens[2], locals, args) && this.resolve(tokens[3], locals, args)) ? 1 : 0, locals);
+              break;
+            case '|':
+              this.assign(tokens[1], (this.resolve(tokens[2], locals, args) || this.resolve(tokens[3], locals, args)) ? 1 : 0, locals);
+              break;
+            case '?':
+              if (this.resolve(tokens[1], locals, args)) {
+                pc = labels[tokens[2]] ?? pc;
+                continue;
+              }
+              break;
+            case '@':
+              pc = labels[tokens[1]] ?? pc;
+              continue;
+            case '.':
+              this.output.push(String(this.resolve(tokens[1], locals, args)));
+              break;
+            case '$': {
+              const resultVar = tokens[1];
+              const funcId = tokens[2];
+              const callArgs = tokens.slice(3).map(a => this.resolve(a, locals, args));
+              const ret = this.callFunction(funcId, callArgs);
+              this.assign(resultVar, ret, locals);
+              break;
+            }
+            case '^':
+              return this.resolve(tokens[1], locals, args);
+          }
+          pc++;
+        }
+        
+        if (iterations >= maxIterations) {
+          this.output.push('[Error: Maximum iterations exceeded]');
+        }
+        return 0;
+      }
+
+      callFunction(funcId, args) {
+        const func = this.functions[funcId];
+        if (!func) return 0;
+        return this.executeBlock(func.body, {}, args);
+      }
+
+      tokenize(line) {
+        const tokens = [];
+        let inString = false;
+        let current = '';
+        
+        for (const char of line) {
+          if (char === '"') {
+            inString = !inString;
+            current += char;
+          } else if (char === ' ' && !inString) {
+            if (current) {
+              tokens.push(current);
+              current = '';
+            }
+          } else {
+            current += char;
+          }
+        }
+        if (current) tokens.push(current);
+        return tokens;
+      }
+
+      run(code) {
+        this.output = [];
+        this.globals = {};
+        this.functions = {};
+        
+        const mainLines = [];
+        let currentFunc = null;
+        let funcBody = [];
+        let funcArgc = 0;
+
+        for (let line of code.split('\n')) {
+          line = line.trim();
+          if (!line || line.startsWith(';')) continue;
+          
+          const tokens = this.tokenize(line);
+          if (!tokens.length) continue;
+
+          if (tokens[0] === '#') {
+            currentFunc = tokens[1];
+            funcArgc = parseInt(tokens[2]) || 0;
+            funcBody = [];
+          } else if (tokens[0] === '}') {
+            if (currentFunc !== null) {
+              this.functions[currentFunc] = { argc: funcArgc, body: funcBody };
+              currentFunc = null;
+            }
+          } else if (currentFunc !== null) {
+            funcBody.push(tokens);
+          } else {
+            mainLines.push(tokens);
+          }
+        }
+
+        this.executeBlock(mainLines);
+        return this.output;
+      }
+    }
+
+    // ===== Sui to Python Transpiler (Complete Port of sui2py.py) =====
+    class Sui2PyTranspiler {
+      constructor() {
+        this.indent = 0;
+        this.output = [];
+        this.functions = {};
+      }
+
+      emit(line) {
+        this.output.push('    '.repeat(this.indent) + line);
+      }
+
+      parseLine(line) {
+        // Remove comments
+        const commentIdx = line.indexOf(';');
+        if (commentIdx !== -1) {
+          line = line.slice(0, commentIdx);
+        }
+        line = line.trim();
+        if (!line) return null;
+        return this.tokenize(line);
+      }
+
+      tokenize(line) {
+        const tokens = [];
+        let inString = false;
+        let current = '';
+        for (const char of line) {
+          if (char === '"') {
+            inString = !inString;
+            current += char;
+          } else if (char === ' ' && !inString) {
+            if (current) { tokens.push(current); current = ''; }
+          } else {
+            current += char;
+          }
+        }
+        if (current) tokens.push(current);
+        return tokens;
+      }
+
+      resolveValue(val) {
+        // Convert a value to Python expression
+        return val;
+      }
+
+      transpileBlock(lines, isFunction = false) {
+        // Collect labels
+        const labels = new Set();
+        for (const tokens of lines) {
+          if (tokens && tokens[0] === ':') {
+            labels.add(parseInt(tokens[1]));
+          }
+        }
+
+        // Use state machine pattern if labels exist
+        if (labels.size > 0) {
+          this.emit('_state = -1');
+          this.emit('while True:');
+          this.indent++;
+          this.emit('_state += 1');
+
+          // Map labels to state numbers
+          const stateMap = new Map();
+          stateMap.set(-1, 0);
+          let stateNum = 1;
+
+          for (const label of [...labels].sort((a, b) => a - b)) {
+            stateMap.set(label, stateNum);
+            stateNum++;
+          }
+
+          // Group instructions by state
+          const states = new Map();
+          states.set(0, []);
+          let current = 0;
+
+          for (const tokens of lines) {
+            if (tokens[0] === ':') {
+              const labelId = parseInt(tokens[1]);
+              current = stateMap.get(labelId);
+              if (!states.has(current)) {
+                states.set(current, []);
+              }
+            } else if (tokens[0] === '}') {
+              continue;
+            } else {
+              if (!states.has(current)) {
+                states.set(current, []);
+              }
+              states.get(current).push(tokens);
+            }
+          }
+
+          // Generate code for each state
+          const sortedStates = [...states.keys()].sort((a, b) => a - b);
+          for (const stateId of sortedStates) {
+            this.emit(`if _state == ${stateId}:`);
+            this.indent++;
+
+            const stateLines = states.get(stateId);
+            if (!stateLines || stateLines.length === 0) {
+              this.emit('pass');
+            } else {
+              for (const tokens of stateLines) {
+                this.transpileInstruction(tokens, stateMap, isFunction);
+              }
+            }
+
+            // State transition
+            if (stateLines && stateLines.length > 0) {
+              const lastOp = stateLines[stateLines.length - 1][0];
+              if (!['?', '@', '^'].includes(lastOp)) {
+                const nextState = stateId + 1;
+                if (states.has(nextState)) {
+                  this.emit(`_state = ${nextState} - 1`);
+                  this.emit('continue');
+                } else {
+                  this.emit('break');
+                }
+              }
+            } else {
+              this.emit('break');
+            }
+
+            this.indent--;
+          }
+
+          this.emit('break');
+          this.indent--;
+        } else {
+          // Simple case: no labels
+          for (const tokens of lines) {
+            if (tokens[0] !== '}') {
+              this.transpileInstruction(tokens, new Map(), isFunction);
+            }
+          }
+        }
+      }
+
+      transpileInstruction(tokens, stateMap, isFunction = false) {
+        if (!tokens || tokens.length === 0) return;
+
+        const op = tokens[0];
+
+        switch (op) {
+          case '=':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])}`);
+            break;
+          case '+':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])} + ${this.resolveValue(tokens[3])}`);
+            break;
+          case '-':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])} - ${this.resolveValue(tokens[3])}`);
+            break;
+          case '*':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])} * ${this.resolveValue(tokens[3])}`);
+            break;
+          case '/':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])} / ${this.resolveValue(tokens[3])}`);
+            break;
+          case '%':
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])} % ${this.resolveValue(tokens[3])}`);
+            break;
+          case '<':
+            this.emit(`${tokens[1]} = 1 if ${this.resolveValue(tokens[2])} < ${this.resolveValue(tokens[3])} else 0`);
+            break;
+          case '>':
+            this.emit(`${tokens[1]} = 1 if ${this.resolveValue(tokens[2])} > ${this.resolveValue(tokens[3])} else 0`);
+            break;
+          case '~':
+            this.emit(`${tokens[1]} = 1 if ${this.resolveValue(tokens[2])} == ${this.resolveValue(tokens[3])} else 0`);
+            break;
+          case '!':
+            this.emit(`${tokens[1]} = 0 if ${this.resolveValue(tokens[2])} else 1`);
+            break;
+          case '&':
+            this.emit(`${tokens[1]} = 1 if (${this.resolveValue(tokens[2])} and ${this.resolveValue(tokens[3])}) else 0`);
+            break;
+          case '|':
+            this.emit(`${tokens[1]} = 1 if (${this.resolveValue(tokens[2])} or ${this.resolveValue(tokens[3])}) else 0`);
+            break;
+          case '?': {
+            // Conditional jump
+            const cond = this.resolveValue(tokens[1]);
+            const label = parseInt(tokens[2]);
+            if (stateMap.has(label)) {
+              this.emit(`if ${cond}:`);
+              this.indent++;
+              this.emit(`_state = ${stateMap.get(label)} - 1`);
+              this.emit('continue');
+              this.indent--;
+            }
+            break;
+          }
+          case '@': {
+            // Unconditional jump
+            const label = parseInt(tokens[1]);
+            if (stateMap.has(label)) {
+              this.emit(`_state = ${stateMap.get(label)} - 1`);
+              this.emit('continue');
+            }
+            break;
+          }
+          case ':':
+            // Label (handled by state machine)
+            break;
+          case '$': {
+            // Function call
+            const result = tokens[1];
+            const funcId = tokens[2];
+            const args = tokens.slice(3).map(a => this.resolveValue(a)).join(', ');
+            this.emit(`${result} = f${funcId}(${args})`);
+            break;
+          }
+          case '^':
+            // Return
+            this.emit(`return ${this.resolveValue(tokens[1])}`);
+            break;
+          case '[':
+            // Array create
+            this.emit(`${tokens[1]} = [0] * ${this.resolveValue(tokens[2])}`);
+            break;
+          case ']':
+            // Array read
+            this.emit(`${tokens[1]} = ${this.resolveValue(tokens[2])}[int(${this.resolveValue(tokens[3])})]`);
+            break;
+          case '{':
+            // Array write
+            if (tokens.length >= 4) {
+              this.emit(`${this.resolveValue(tokens[1])}[int(${this.resolveValue(tokens[2])})] = ${this.resolveValue(tokens[3])}`);
+            }
+            break;
+          case '.':
+            // Output
+            this.emit(`print(${this.resolveValue(tokens[1])})`);
+            break;
+          case ',':
+            // Input
+            this.emit('_input = input()');
+            this.emit('try:');
+            this.indent++;
+            this.emit(`${tokens[1]} = int(_input)`);
+            this.indent--;
+            this.emit('except ValueError:');
+            this.indent++;
+            this.emit(`${tokens[1]} = _input`);
+            this.indent--;
+            break;
+          case '#':
+          case '}':
+            // Handled separately
+            break;
+        }
+      }
+
+      transpile(code) {
+        this.output = [];
+        this.functions = {};
+        
+        const linesRaw = code.trim().split('\n');
+        const lines = [];
+
+        for (const line of linesRaw) {
+          const parsed = this.parseLine(line);
+          if (parsed) {
+            lines.push(parsed);
+          }
+        }
+
+        // Collect function definitions
+        let i = 0;
+        while (i < lines.length) {
+          if (lines[i][0] === '#') {
+            const funcId = parseInt(lines[i][1]);
+            const argc = parseInt(lines[i][2]);
+
+            // Collect function body
+            const body = [];
+            i++;
+            let depth = 1;
+            while (i < lines.length && depth > 0) {
+              if (lines[i][0] === '#') {
+                depth++;
+              } else if (lines[i][0] === '}') {
+                depth--;
+                if (depth === 0) break;
+              }
+              body.push(lines[i]);
+              i++;
+            }
+
+            this.functions[funcId] = { argc, body };
+          }
+          i++;
+        }
+
+        // Output header
+        this.emit('#!/usr/bin/env python3');
+        this.emit('# Auto-generated from Sui');
+        this.emit('');
+
+        // Output function definitions
+        const sortedFuncs = Object.keys(this.functions).map(Number).sort((a, b) => a - b);
+        for (const funcId of sortedFuncs) {
+          const funcInfo = this.functions[funcId];
+          const argc = funcInfo.argc;
+          const body = funcInfo.body;
+
+          const argsStr = Array.from({ length: argc }, (_, i) => `a${i}`).join(', ');
+          this.emit(`def f${funcId}(${argsStr}):`);
+          this.indent++;
+
+          if (body.length > 0) {
+            this.transpileBlock(body, true);
+          } else {
+            this.emit('pass');
+          }
+
+          this.indent--;
+          this.emit('');
+        }
+
+        // Output main code
+        this.emit('# Main');
+        const mainLines = [];
+        i = 0;
+        while (i < lines.length) {
+          if (lines[i][0] === '#') {
+            // Skip function definition
+            let depth = 1;
+            i++;
+            while (i < lines.length && depth > 0) {
+              if (lines[i][0] === '#') {
+                depth++;
+              } else if (lines[i][0] === '}') {
+                depth--;
+              }
+              i++;
+            }
+          } else {
+            mainLines.push(lines[i]);
+            i++;
+          }
+        }
+
+        if (mainLines.length > 0) {
+          this.transpileBlock(mainLines);
+        } else {
+          this.emit('pass');
+        }
+
+        return this.output.join('\n');
+      }
+    }
+
+    function sui2python(code) {
+      const transpiler = new Sui2PyTranspiler();
+      return transpiler.transpile(code);
+    }
+
+    // ===== Examples =====
+    const EXAMPLES = {
+      hello: `; Print 1 to 10
+= v0 1
+: 0
+> v1 v0 10
+? v1 1
+. v0
++ v0 v0 1
+@ 0
+: 1`,
+      fibonacci: `; Fibonacci - fib(10) = 55
+# 0 1 {
+< v0 a0 2
+! v1 v0
+? v1 1
+^ a0
+: 1
+- v2 a0 1
+$ v3 0 v2
+- v4 a0 2
+$ v5 0 v4
++ v6 v3 v5
+^ v6
+}
+= g0 10
+$ g1 0 g0
+. g1`,
+      fizzbuzz: `; FizzBuzz 1-30
+= v0 1
+: 0
+> v1 v0 30
+? v1 9
+% v2 v0 15
+~ v3 v2 0
+? v3 1
+% v4 v0 3
+~ v5 v4 0
+? v5 2
+% v6 v0 5
+~ v7 v6 0
+? v7 3
+. v0
+@ 4
+: 1
+. "FizzBuzz"
+@ 4
+: 2
+. "Fizz"
+@ 4
+: 3
+. "Buzz"
+: 4
++ v0 v0 1
+@ 0
+: 9`,
+      factorial: `; Factorial - 5! = 120
+# 0 1 {
+< v0 a0 2
+! v1 v0
+? v1 1
+^ 1
+: 1
+- v2 a0 1
+$ v3 0 v2
+* v4 a0 v3
+^ v4
+}
+= g0 5
+$ g1 0 g0
+. g1`
+    };
+
+    // ===== UI =====
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('output');
+    const python = document.getElementById('python');
+
+    function runCode() {
+      const code = editor.value;
+      try {
+        // Run interpreter
+        const interp = new SuiInterpreter();
+        const result = interp.run(code);
+        output.textContent = result.join('\n') || '(no output)';
+        
+        // Generate Python
+        python.textContent = sui2python(code);
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+        python.textContent = '# Error generating Python';
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.output-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.getElementById('run').addEventListener('click', runCode);
+    document.getElementById('clear').addEventListener('click', () => { 
+      output.textContent = ''; 
+      python.textContent = '';
+    });
+
+    document.querySelectorAll('.example-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const example = btn.dataset.example;
+        if (EXAMPLES[example]) editor.value = EXAMPLES[example];
+      });
+    });
+
+    editor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runCode();
+      }
+    });
+  </script>
+</body>
+</html>
