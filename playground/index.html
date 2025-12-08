@@ -128,28 +128,69 @@
     }
     
     .tab:hover {
-      color: #666;
+      color: var(--ink);
+      background: transparent;
+      border-color: transparent;
+      border-bottom-color: #ddd;
     }
     
     .tab.active {
       color: var(--ink);
+      background: transparent;
       border-bottom-color: var(--accent);
     }
     
-    #editor {
-      width: 100%;
+    .editor-wrapper {
+      position: relative;
       height: 400px;
+      background: var(--code-bg);
+      overflow: hidden;
+    }
+    
+    #editor-highlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      pointer-events: none;
+      overflow: auto;
+      color: var(--ink);
+    }
+    
+    #editor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       padding: 1.25rem;
       font-family: 'JetBrains Mono', monospace;
       font-size: 14px;
       line-height: 1.6;
       border: none;
       resize: none;
-      background: var(--code-bg);
-      color: var(--ink);
+      background: transparent;
+      color: transparent;
+      caret-color: var(--ink);
+      z-index: 1;
     }
     
     #editor:focus { outline: none; }
+    #editor::selection { background: rgba(196, 30, 58, 0.2); }
+    
+    /* Sui syntax colors (light theme) */
+    .sui-keyword { color: #c41e3a; font-weight: 500; }
+    .sui-var { color: #0066cc; }
+    .sui-number { color: #098658; }
+    .sui-string { color: #a31515; }
+    .sui-comment { color: #6a9955; font-style: italic; }
     
     .output-container {
       flex: 1;
@@ -268,10 +309,19 @@
       margin-left: 0.5rem;
     }
     
-    .keyword { color: #c41e3a; }
-    .string { color: #2a9d8f; }
-    .comment { color: #999; font-style: italic; }
-    .number { color: #6c5ce7; }
+    #python {
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    /* Sui syntax highlighting - for Python output only */
+    .hl-keyword { color: #c586c0; }
+    .hl-builtin { color: #dcdcaa; }
+    .hl-string { color: #ce9178; }
+    .hl-comment { color: #6a9955; }
+    .hl-number { color: #b5cea8; }
+    .hl-var { color: #9cdcfe; }
+    .hl-func { color: #dcdcaa; }
   </style>
 </head>
 <body>
@@ -285,7 +335,9 @@
       <div class="panel-header">
         <span class="panel-title">Code</span>
       </div>
-      <textarea id="editor" spellcheck="false">; Print 1 to 10
+      <div class="editor-wrapper">
+        <div id="editor-highlight"></div>
+        <textarea id="editor" spellcheck="false">; Print 1 to 10
 = v0 1
 : 0
 > v1 v0 10
@@ -294,6 +346,7 @@
 + v0 v0 1
 @ 0
 : 1</textarea>
+      </div>
       <div class="examples">
         <div class="examples-label">Examples</div>
         <div class="examples-list">
@@ -958,10 +1011,142 @@ $ g1 0 g0
 . g1`
     };
 
+    // ===== Syntax Highlighting =====
+    function highlightSui(code) {
+      const ops = new Set(['=', '+', '-', '*', '/', '%', '<', '>', '~', '!', '&', '|', '?', '@', ':', '^', '.', ',', '#', '}', '[', ']', '{']);
+      
+      return code.split('\n').map(line => {
+        // Check for comment first
+        const commentIdx = line.indexOf(';');
+        let codePart = commentIdx !== -1 ? line.slice(0, commentIdx) : line;
+        let commentPart = commentIdx !== -1 ? line.slice(commentIdx) : '';
+        
+        // Tokenize code part
+        const tokens = [];
+        let i = 0;
+        while (i < codePart.length) {
+          // String
+          if (codePart[i] === '"') {
+            let j = i + 1;
+            while (j < codePart.length && codePart[j] !== '"') {
+              if (codePart[j] === '\\') j++;
+              j++;
+            }
+            const str = codePart.slice(i, j + 1);
+            tokens.push(`<span class="sui-string">${escapeHtml(str)}</span>`);
+            i = j + 1;
+          }
+          // Variable (v0, g0, a0)
+          else if (/[vga]/.test(codePart[i]) && /\d/.test(codePart[i + 1] || '')) {
+            let j = i + 1;
+            while (j < codePart.length && /\d/.test(codePart[j])) j++;
+            tokens.push(`<span class="sui-var">${codePart.slice(i, j)}</span>`);
+            i = j;
+          }
+          // Number
+          else if (/\d/.test(codePart[i])) {
+            let j = i;
+            while (j < codePart.length && /\d/.test(codePart[j])) j++;
+            tokens.push(`<span class="sui-number">${codePart.slice(i, j)}</span>`);
+            i = j;
+          }
+          // Operator (single char instruction)
+          else if (ops.has(codePart[i])) {
+            tokens.push(`<span class="sui-keyword">${escapeHtml(codePart[i])}</span>`);
+            i++;
+          }
+          // Other
+          else {
+            tokens.push(escapeHtml(codePart[i]));
+            i++;
+          }
+        }
+        
+        const highlighted = tokens.join('');
+        const commentHtml = commentPart ? `<span class="sui-comment">${escapeHtml(commentPart)}</span>` : '';
+        return highlighted + commentHtml;
+      }).join('\n') + '\n';
+    }
+    
+    function highlightPython(code) {
+      const keywords = new Set(['def', 'if', 'else', 'elif', 'while', 'for', 'return', 'break', 'continue', 'pass', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'try', 'except', 'import', 'from', 'as', 'class']);
+      const builtins = new Set(['print', 'input', 'int', 'str', 'len', 'range', 'globals']);
+      
+      return code.split('\n').map(line => {
+        // Check for comment first
+        const commentIdx = line.indexOf('#');
+        let codePart = commentIdx !== -1 ? line.slice(0, commentIdx) : line;
+        let commentPart = commentIdx !== -1 ? line.slice(commentIdx) : '';
+        
+        // Tokenize and highlight code part
+        const tokens = [];
+        let i = 0;
+        while (i < codePart.length) {
+          // String
+          if (codePart[i] === '"' || codePart[i] === "'") {
+            const quote = codePart[i];
+            let j = i + 1;
+            while (j < codePart.length && codePart[j] !== quote) {
+              if (codePart[j] === '\\') j++;
+              j++;
+            }
+            const str = codePart.slice(i, j + 1);
+            tokens.push(`<span class="hl-string">${escapeHtml(str)}</span>`);
+            i = j + 1;
+          }
+          // Word (identifier or keyword)
+          else if (/[a-zA-Z_]/.test(codePart[i])) {
+            let j = i;
+            while (j < codePart.length && /[a-zA-Z0-9_]/.test(codePart[j])) j++;
+            const word = codePart.slice(i, j);
+            if (keywords.has(word)) {
+              tokens.push(`<span class="hl-keyword">${word}</span>`);
+            } else if (builtins.has(word)) {
+              tokens.push(`<span class="hl-builtin">${word}</span>`);
+            } else if (/^f\d+$/.test(word)) {
+              tokens.push(`<span class="hl-func">${word}</span>`);
+            } else if (/^[vga]\d+$/.test(word)) {
+              tokens.push(`<span class="hl-var">${word}</span>`);
+            } else if (/^_/.test(word)) {
+              tokens.push(`<span class="hl-var">${word}</span>`);
+            } else {
+              tokens.push(escapeHtml(word));
+            }
+            i = j;
+          }
+          // Number
+          else if (/\d/.test(codePart[i])) {
+            let j = i;
+            while (j < codePart.length && /\d/.test(codePart[j])) j++;
+            tokens.push(`<span class="hl-number">${codePart.slice(i, j)}</span>`);
+            i = j;
+          }
+          // Other character
+          else {
+            tokens.push(escapeHtml(codePart[i]));
+            i++;
+          }
+        }
+        
+        const highlighted = tokens.join('');
+        const commentHtml = commentPart ? `<span class="hl-comment">${escapeHtml(commentPart)}</span>` : '';
+        return highlighted + commentHtml;
+      }).join('\n');
+    }
+    
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     // ===== UI =====
     const editor = document.getElementById('editor');
+    const editorHighlight = document.getElementById('editor-highlight');
     const output = document.getElementById('output');
     const python = document.getElementById('python');
+
+    function updateSuiHighlight() {
+      editorHighlight.innerHTML = highlightSui(editor.value);
+    }
 
     function runCode() {
       const code = editor.value;
@@ -971,13 +1156,21 @@ $ g1 0 g0
         const result = interp.run(code);
         output.textContent = result.join('\n') || '(no output)';
         
-        // Generate Python
-        python.textContent = sui2python(code);
+        // Generate Python with syntax highlighting
+        const pyCode = sui2python(code);
+        python.innerHTML = highlightPython(pyCode);
       } catch (e) {
         output.textContent = 'Error: ' + e.message;
-        python.textContent = '# Error generating Python';
+        python.innerHTML = '<span class="hl-comment"># Error generating Python</span>';
       }
     }
+
+    // Sui editor highlight sync
+    editor.addEventListener('input', updateSuiHighlight);
+    editor.addEventListener('scroll', () => {
+      editorHighlight.scrollTop = editor.scrollTop;
+      editorHighlight.scrollLeft = editor.scrollLeft;
+    });
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -992,13 +1185,16 @@ $ g1 0 g0
     document.getElementById('run').addEventListener('click', runCode);
     document.getElementById('clear').addEventListener('click', () => { 
       output.textContent = ''; 
-      python.textContent = '';
+      python.innerHTML = '';
     });
 
     document.querySelectorAll('.example-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const example = btn.dataset.example;
-        if (EXAMPLES[example]) editor.value = EXAMPLES[example];
+        if (EXAMPLES[example]) {
+          editor.value = EXAMPLES[example];
+          updateSuiHighlight();
+        }
       });
     });
 
@@ -1008,6 +1204,9 @@ $ g1 0 g0
         runCode();
       }
     });
+
+    // Initial highlight
+    updateSuiHighlight();
   </script>
 </body>
 </html>
