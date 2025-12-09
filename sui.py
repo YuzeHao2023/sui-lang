@@ -465,35 +465,35 @@ def validate_line(line: str) -> tuple[bool, str]:
 
     # Check argument count
     expected = valid_ops[op]
-        actual = len(tokens) - 1
-        if actual < expected:
-            return False, f"'{op}' requires {expected} arguments, got {actual}"
+    actual = len(tokens) - 1
+    if actual < expected:
+        return False, f"'{op}' requires {expected} arguments, got {actual}"
 
     return True, ""
 
 
 def _print_help():
-        print("Sui (粋) - Programming Language for LLMs")
-        print("=" * 50)
-        print("")
-        print("Usage:")
+    print("Sui (粋) - Programming Language for LLMs")
+    print("=" * 50)
+    print("")
+    print("Usage:")
     print("  sui                 # Start REPL (default when no args)")
     print("  sui <file.sui> [args...]")
     print("  sui --help          # Show this help")
     print("  sui --repl          # Force REPL mode")
     print("  sui --validate <file.sui>")
-        print("")
-        print("Argument access:")
-        print("  g100 = argument count (argc)")
-        print("  g101 = first argument")
-        print("  g102 = second argument")
-        print("  ...")
-        print("")
-        print("Sample execution:")
-        print("-" * 50)
+    print("")
+    print("Argument access:")
+    print("  g100 = argument count (argc)")
+    print("  g101 = first argument")
+    print("  g102 = second argument")
+    print("  ...")
+    print("")
+    print("Sample execution:")
+    print("-" * 50)
 
-        # Fibonacci sample
-        fib_code = """
+    # Fibonacci sample
+    fib_code = """
 ; Fibonacci function
 # 0 1 {
   < v0 a0 2
@@ -515,18 +515,18 @@ $ g1 0 g0
 . g1
 """
 
-        print("Sui (Fibonacci):")
-        print(fib_code.strip())
-        print("")
-        print("Result:")
-        interp = SuiInterpreter()
-        interp.run(fib_code)
+    print("Sui (Fibonacci):")
+    print(fib_code.strip())
+    print("")
+    print("Result:")
+    interp = SuiInterpreter()
+    interp.run(fib_code)
 
-        print("")
-        print("-" * 50)
+    print("")
+    print("-" * 50)
 
-        # Loop sample
-        loop_code = """
+    # Loop sample
+    loop_code = """
 = v0 0
 : 0
 < v1 v0 10
@@ -538,14 +538,14 @@ $ g1 0 g0
 : 1
 """
 
-        print("Sui (0-9 Loop):")
-        print(loop_code.strip())
-        print("")
-        print("Result:")
-        interp = SuiInterpreter()
-        interp.run(loop_code)
-        print("")
-        print("-" * 50)
+    print("Sui (0-9 Loop):")
+    print(loop_code.strip())
+    print("")
+    print("Result:")
+    interp = SuiInterpreter()
+    interp.run(loop_code)
+    print("")
+    print("-" * 50)
 
 
 def main():
@@ -592,15 +592,15 @@ def main():
         _print_help()
         sys.exit(1)
 
-        # Execution mode
+    # Execution mode
     with open(args[0], 'r') as f:
-            code = f.read()
+        code = f.read()
 
-        # Pass additional arguments to the program
+    # Pass additional arguments to the program
     program_args = args[1:]
 
-        interp = SuiInterpreter()
-        interp.run(code, args=program_args)
+    interp = SuiInterpreter()
+    interp.run(code, args=program_args)
 
 
 if __name__ == '__main__':
