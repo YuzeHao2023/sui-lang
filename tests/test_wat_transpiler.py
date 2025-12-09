@@ -1,4 +1,4 @@
-"""Tests for Sui to WAT transpiler (sui2wat)"""
+"""Tests for Sui to WAT transpiler (sui2wasm.Sui2WatTranspiler)"""
 
 import pytest
 import sys
