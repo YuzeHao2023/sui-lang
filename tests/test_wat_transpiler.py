@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sui2wat import Sui2WatTranspiler
+from sui2wasm import Sui2WatTranspiler
 
 
 class TestSui2WatBasic:

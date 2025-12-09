@@ -13,7 +13,7 @@ try:
 except ImportError:
     WASMTIME_AVAILABLE = False
 
-from sui2wat import Sui2WatTranspiler
+from sui2wasm import Sui2WatTranspiler
 
 
 class SuiWasmRuntime:

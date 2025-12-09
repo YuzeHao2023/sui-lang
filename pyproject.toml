@@ -49,7 +49,7 @@ wasm = [
 ]
 
 [tool.setuptools]
-py-modules = ["sui", "sui2py", "sui2wat", "sui2wasm", "suiwasm", "py2sui"]
+py-modules = ["sui", "sui2py", "sui2wasm", "suiwasm", "py2sui"]
 
 [tool.setuptools.packages.find]
 where = ["."]
