@@ -334,32 +334,32 @@ See [prompts/examples.md](prompts/examples.md) for prompt templates and expected
 - [x] Transpiler (Python → Sui, for humans)
 - [x] Interactive mode (REPL)
 - [x] WebAssembly output (WAT + runtime)
-- [ ] Mathematical primitives (linear algebra, statistics) ([#8](https://github.com/TakatoHonda/sui-lang/issues/8))
 - [ ] Package manager (hash-based IDs) ([#9](https://github.com/TakatoHonda/sui-lang/issues/9))
+- [ ] Standard packages: sui-math, sui-crypto ([#8](https://github.com/TakatoHonda/sui-lang/issues/8))
 - [ ] Type annotations (optional)
 - [ ] LLVM IR output
 
-### Future: Mathematical Extensions
+### Future: Standard Packages
 
-Sui will extend with **numeric-ID based primitives** (no identifiers):
+Mathematical and utility functions will be provided as **standard packages** (not built-in):
 
 ```sui
-; Matrix operations (proposed)
-M 0 v2 v0 v1   ; v2 = matmul(v0, v1)
-M 1 v2 v0 v1   ; v2 = matadd(v0, v1)
-M 2 v2 v0 0    ; v2 = transpose(v0)
+; sui-math package (ID: 1829473628)
+X 1829473628 0 v2 v0 v1   ; matmul(v0, v1) → v2
+X 1829473628 1 v3 v0      ; transpose(v0) → v3
+X 1829473628 10 v4 v0     ; mean(v0) → v4
+X 1829473628 11 v5 v0     ; std(v0) → v5
 
-; Statistics (proposed)
-S 0 v1 v0      ; v1 = mean(v0)
-S 1 v1 v0      ; v1 = std(v0)
+; sui-crypto package (ID: 562847193)
+X 562847193 0 v6 v0       ; sha256(v0) → v6
 ```
 
 Design principles maintained:
-- No identifiers (numeric IDs only)
-- One instruction per line
-- Zero typo possibility
+- No identifiers (package/function IDs are numeric)
+- Consistent with package manager design (#9)
+- Core language stays minimal
 
-See [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8) for details.
+See [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8) (sui-math) and [Issue #9](https://github.com/TakatoHonda/sui-lang/issues/9) (package manager) for details.
 
 ## License
 

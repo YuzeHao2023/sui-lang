@@ -61,15 +61,16 @@ Candidates:
 - [ ] Educational programming language
 - [ ] Scientific computing (with math extensions)
 
-### Priority 5: Mathematical Extensions (#8)
+### Priority 5: Standard Packages (#8, #9)
 
-**Goal**: Deepen language capabilities
+**Goal**: Provide common functionality via packages (not built-in)
 
-- [ ] Matrix operations (`M` instruction)
-- [ ] Statistics operations (`S` instruction)
-- [ ] Signal processing (`D` instruction)
+- [ ] Package manager implementation (#9)
+- [ ] `sui-math` package: matrix, statistics (#8)
+- [ ] `sui-crypto` package: hash, encryption
+- [ ] `sui-algo` package: sort, search, graph
 
-See [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8)
+See [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8) and [Issue #9](https://github.com/TakatoHonda/sui-lang/issues/9)
 
 ## Ecosystem Development
 

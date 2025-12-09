@@ -359,32 +359,32 @@ SuiはLLMによるコード生成のために設計されている。`prompts/` 
 - [x] トランスパイラ（Python → Sui、人間向け）
 - [x] インタラクティブモード (REPL)
 - [x] WebAssembly出力（WAT + ランタイム）
-- [ ] 数学プリミティブ（線形代数、統計）([#8](https://github.com/TakatoHonda/sui-lang/issues/8))
 - [ ] パッケージマネージャー（ハッシュベースID）([#9](https://github.com/TakatoHonda/sui-lang/issues/9))
+- [ ] 標準パッケージ: sui-math, sui-crypto ([#8](https://github.com/TakatoHonda/sui-lang/issues/8))
 - [ ] 型注釈（オプション）
 - [ ] LLVM IR出力
 
-### 将来: 数学拡張
+### 将来: 標準パッケージ
 
-Suiは**数値IDベースのプリミティブ**で拡張予定（識別子なし）：
+数学やユーティリティ関数は**標準パッケージ**として提供（組み込みではない）：
 
 ```sui
-; 行列演算（提案）
-M 0 v2 v0 v1   ; v2 = matmul(v0, v1)
-M 1 v2 v0 v1   ; v2 = matadd(v0, v1)
-M 2 v2 v0 0    ; v2 = transpose(v0)
+; sui-math パッケージ (ID: 1829473628)
+X 1829473628 0 v2 v0 v1   ; matmul(v0, v1) → v2
+X 1829473628 1 v3 v0      ; transpose(v0) → v3
+X 1829473628 10 v4 v0     ; mean(v0) → v4
+X 1829473628 11 v5 v0     ; std(v0) → v5
 
-; 統計（提案）
-S 0 v1 v0      ; v1 = mean(v0)
-S 1 v1 v0      ; v1 = std(v0)
+; sui-crypto パッケージ (ID: 562847193)
+X 562847193 0 v6 v0       ; sha256(v0) → v6
 ```
 
 設計原則を維持：
-- 識別子なし（数値IDのみ）
-- 1行1命令
-- タイポ不可能
+- 識別子なし（パッケージ/関数IDは数値）
+- パッケージマネージャー設計(#9)と一貫性
+- コア言語は最小限
 
-詳細は [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8) を参照。
+詳細は [Issue #8](https://github.com/TakatoHonda/sui-lang/issues/8)（sui-math）と [Issue #9](https://github.com/TakatoHonda/sui-lang/issues/9)（パッケージマネージャー）を参照。
 
 ## ライセンス
 
