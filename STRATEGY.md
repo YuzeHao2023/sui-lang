@@ -116,9 +116,9 @@ X 56284719384756 0 v3 v0       ; sui-crypto:sha256
 
 | Packages | 32bit | 48bit | 64bit |
 |----------|-------|-------|-------|
-| 614K (PyPI現在) | 100% | 0.07% | ~0% |
-| 3M (5倍成長) | 100% | 1.6% | ~0% |
-| 6M (10倍成長) | 100% | 6.2% | ~0% |
+| 614K (PyPI current) | 100% | 0.07% | ~0% |
+| 3M (5x growth) | 100% | 1.6% | ~0% |
+| 6M (10x growth) | 100% | 6.2% | ~0% |
 
 **Recommendation**: 48bit minimum, 64bit for future-proofing
 
