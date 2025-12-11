@@ -1,28 +1,28 @@
 ; Argument demo program
-; Usage: python sui.py examples/args_demo.sui 5 3
+; Usage: sui examples/args_demo.sui 5 3
 ; → Calculate 5 + 3 = 8
 
 ; Print argument count
 . "argc:"
-. g100
+. c0
 
 ; Use default if no arguments
-~ v0 g100 0
+~ v0 c0 0
 ? v0 0
 
-; With args: calculate g101 + g102
+; With args: calculate c1 + c2
 . "arg1:"
-. g101
+. c1
 . "arg2:"
-. g102
+. c2
 
-+ v1 g101 g102
++ v1 c1 c2
 . "sum:"
 . v1
 @ 1
 
 ; No arguments case
 : 0
-. "Usage: sui.py args_demo.sui num1 num2"
+. "Usage: sui args_demo.sui num1 num2"
 
 : 1

@@ -136,6 +136,10 @@ class SuiInterpreter:
         elif val.startswith('a'):
             idx = int(val[1:])
             return self.context.args[idx] if idx < len(self.context.args) else 0
+        elif val.startswith('c'):
+            # Command-line arguments: c0 = argc, c1+ = argv
+            idx = int(val[1:])
+            return self.cmd_args.get(idx, 0)
         elif val.startswith('"') and val.endswith('"'):
             return val[1:-1]
         elif '.' in val:
@@ -152,6 +156,9 @@ class SuiInterpreter:
             self.context.local_vars[int(var[1:])] = value
         elif var.startswith('g'):
             self.global_vars[int(var[1:])] = value
+        elif var.startswith('c'):
+            # Command-line arguments are read-only
+            pass  # Silently ignore writes to c0, c1, ...
 
     def execute_line(self, tokens: list[str]) -> tuple[bool, Optional[int]]:
         """
@@ -337,29 +344,30 @@ class SuiInterpreter:
     def run(self, code: str, args: list = None) -> list:
         """
         Execute code
-        args: Command-line arguments (accessible as g100=argc, g101=argv[0], ...)
+        args: Command-line arguments (accessible as c0=argc, c1=argv[0], ...)
         """
         self.output = []
         self.global_vars = {}
+        self.cmd_args = {}  # Command-line arguments (read-only)
         self.functions = {}
         self.context = Context()
         self.context_stack = []
 
-        # Set command-line arguments as global variables
-        # g100 = argc (number of arguments)
-        # g101, g102, ... = argv[0], argv[1], ...
+        # Set command-line arguments
+        # c0 = argc (number of arguments)
+        # c1, c2, ... = argv[0], argv[1], ...
         if args:
-            self.global_vars[100] = len(args)
+            self.cmd_args[0] = len(args)
             for i, arg in enumerate(args):
                 try:
-                    self.global_vars[101 + i] = int(arg)
+                    self.cmd_args[1 + i] = int(arg)
                 except ValueError:
                     try:
-                        self.global_vars[101 + i] = float(arg)
+                        self.cmd_args[1 + i] = float(arg)
                     except ValueError:
-                        self.global_vars[101 + i] = arg
+                        self.cmd_args[1 + i] = arg
         else:
-            self.global_vars[100] = 0
+            self.cmd_args[0] = 0
 
         lines = self.parse(code)
 
@@ -484,9 +492,9 @@ def _print_help():
     print("  sui --validate <file.sui>")
     print("")
     print("Argument access:")
-    print("  g100 = argument count (argc)")
-    print("  g101 = first argument")
-    print("  g102 = second argument")
+    print("  c0 = argument count (argc)")
+    print("  c1 = first argument (argv[0])")
+    print("  c2 = second argument (argv[1])")
     print("  ...")
     print("")
     print("Sample execution:")

@@ -28,6 +28,7 @@ class Sui2WatTranspiler:
         self.indent = 0
         self.functions: dict[int, dict] = {}
         self.used_globals: set[int] = set()
+        self.used_cmd_args: set[int] = set()  # Command-line arguments (c0, c1, ...)
         self.use_memory = False
 
     def emit(self, line: str):
@@ -79,6 +80,11 @@ class Sui2WatTranspiler:
                         self.used_globals.add(int(token[1:]))
                     except ValueError:
                         pass
+                elif token.startswith('c'):
+                    try:
+                        self.used_cmd_args.add(int(token[1:]))
+                    except ValueError:
+                        pass
 
     def resolve_value(self, val: str) -> str:
         """Resolve a value to WAT code"""
@@ -91,6 +97,10 @@ class Sui2WatTranspiler:
         elif val.startswith('a'):
             idx = int(val[1:])
             return f"(local.get $a{idx})"
+        elif val.startswith('c'):
+            # Command-line arguments (read-only globals)
+            idx = int(val[1:])
+            return f"(global.get $c{idx})"
         elif val.startswith('"'):
             return "(i32.const 0)"
         elif '.' in val:
@@ -109,6 +119,9 @@ class Sui2WatTranspiler:
         elif var.startswith('g'):
             idx = int(var[1:])
             return f"(global.set $g{idx})"
+        elif var.startswith('c'):
+            # Command-line arguments are read-only, ignore writes
+            return ""
         return ""
 
     def transpile_block(self, lines: list[list[str]], local_vars: set[int], is_function: bool = False) -> list[str]:
@@ -361,6 +374,7 @@ class Sui2WatTranspiler:
         """Transpile Sui code to WAT"""
         self.output = []
         self.used_globals = set()
+        self.used_cmd_args = set()
         self.use_memory = False
         self.functions = {}
         
@@ -411,6 +425,12 @@ class Sui2WatTranspiler:
             self.emit(";; Global variables")
             for g in sorted(self.used_globals):
                 self.emit(f"(global $g{g} (export \"g{g}\") (mut i32) (i32.const 0))")
+            self.emit("")
+
+        if self.used_cmd_args:
+            self.emit(";; Command-line arguments (set by host)")
+            for c in sorted(self.used_cmd_args):
+                self.emit(f"(global $c{c} (export \"c{c}\") (mut i32) (i32.const 0))")
             self.emit("")
 
         if self.functions:

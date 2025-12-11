@@ -188,8 +188,8 @@ python py2sui.py your_code.py
 | `v0`, `v1`, ... | Local variables |
 | `g0`, `g1`, ... | Global variables |
 | `a0`, `a1`, ... | Function arguments |
-| `g100` | argc (command-line argument count) |
-| `g101`, `g102`, ... | argv (command-line arguments) |
+| `c0` | argc (command-line argument count) |
+| `c1`, `c2`, ... | argv (command-line arguments, read-only) |
 
 ## Examples
 

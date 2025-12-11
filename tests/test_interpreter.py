@@ -248,22 +248,34 @@ class TestStrings:
 
 
 class TestCommandLineArgs:
-    """Test command-line argument handling"""
+    """Test command-line argument handling (c0 = argc, c1+ = argv)"""
 
     def test_args_count(self):
         interp = SuiInterpreter()
-        result = interp.run(". g100", args=["10", "20"])
+        result = interp.run(". c0", args=["10", "20"])
         assert result == [2]
 
     def test_args_values(self):
         interp = SuiInterpreter()
-        result = interp.run("+ v0 g101 g102\n. v0", args=["10", "20"])
+        result = interp.run("+ v0 c1 c2\n. v0", args=["10", "20"])
         assert result == [30]
 
     def test_no_args(self):
         interp = SuiInterpreter()
-        result = interp.run(". g100", args=[])
+        result = interp.run(". c0", args=[])
         assert result == [0]
+
+    def test_args_read_only(self):
+        """Command-line args should be read-only (writes ignored)"""
+        interp = SuiInterpreter()
+        result = interp.run(". c1\n= c1 999\n. c1", args=["hello"])
+        assert result == ["hello", "hello"]
+
+    def test_g100_now_user_space(self):
+        """g100 is no longer reserved, should be user-writable"""
+        interp = SuiInterpreter()
+        result = interp.run("= g100 42\n. g100", args=["hello"])
+        assert result == [42]
 
 
 class TestValidation:

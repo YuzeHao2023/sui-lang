@@ -40,7 +40,7 @@ class Sui2PyTranspiler:
 
     def resolve_value(self, val: str) -> str:
         """Convert a value to Python expression"""
-        if val.startswith('v') or val.startswith('g') or val.startswith('a'):
+        if val.startswith('v') or val.startswith('g') or val.startswith('a') or val.startswith('c'):
             return val
         elif val.startswith('"'):
             return val
@@ -276,19 +276,19 @@ class Sui2PyTranspiler:
         self.emit("# Auto-generated from Sui")
         self.emit("")
 
-        # Initialize globals from command-line arguments
-        self.emit("# Global variables from command-line arguments")
+        # Initialize command-line arguments (c0 = argc, c1+ = argv)
+        self.emit("# Command-line arguments (read-only)")
         self.emit("import sys")
-        self.emit("g100 = len(sys.argv) - 1")
+        self.emit("c0 = len(sys.argv) - 1")
         self.emit("for _i, _arg in enumerate(sys.argv[1:]):")
         self.indent += 1
         self.emit("try:")
         self.indent += 1
-        self.emit("globals()[f'g{101 + _i}'] = int(_arg)")
+        self.emit("globals()[f'c{1 + _i}'] = int(_arg)")
         self.indent -= 1
         self.emit("except ValueError:")
         self.indent += 1
-        self.emit("globals()[f'g{101 + _i}'] = _arg")
+        self.emit("globals()[f'c{1 + _i}'] = _arg")
         self.indent -= 1
         self.indent -= 1
         self.emit("")
