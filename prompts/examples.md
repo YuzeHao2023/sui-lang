@@ -445,14 +445,14 @@ Generate Sui code for bubble sort on an array of 5 elements
 ```sui
 ; for i in range(n)
 = v0 0
-: start_label
+: 0
 < v1 v0 n
 ! v2 v1
-? v2 end_label
+? v2 1
 [body using v0 as i]
 + v0 v0 1
-@ start_label
-: end_label
+@ 0
+: 1
 ```
 
 ### Function Pattern
@@ -472,23 +472,23 @@ Generate Sui code for bubble sort on an array of 5 elements
 ; else:
 ;     else_block
 [compute condition into v0]
-? v0 else_label
+? v0 0
 [then_block]
-@ end_label
-: else_label
+@ 1
+: 0
 [else_block]
-: end_label
+: 1
 ```
 
 ### While Loop Pattern
 ```sui
 ; while condition:
 ;     body
-: loop_start
+: 0
 [compute condition into v0]
 ! v1 v0
-? v1 loop_end
+? v1 1
 [body]
-@ loop_start
-: loop_end
+@ 0
+: 1
 ```

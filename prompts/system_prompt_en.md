@@ -30,9 +30,9 @@ Sui is a pure logic language. One instruction per line, identifiers are sequenti
 ! R A            NOT
 & R A B          AND
 | R A B          OR
-? COND LABEL     Conditional jump
-@ LABEL          Unconditional jump
-: LABEL          Label definition
+? COND LABEL     Conditional jump (LABEL must be an integer)
+@ LABEL          Unconditional jump (LABEL must be an integer)
+: LABEL          Label definition (LABEL must be an integer)
 # ID ARGC {      Function definition
 }                Function end
 $ R FN ARGS...   Function call
@@ -47,6 +47,10 @@ $ R FN ARGS...   Function call
 v0, v1, v2...    Local variables
 g0, g1, g2...    Global variables (state, accessible from UI)
 a0, a1, a2...    Function arguments
+
+### Labels (Important)
+- **LABEL must be an integer** (e.g., `0`, `1`, `2`)
+- Do **not** use symbolic labels like `: start_label`
 
 ## Wasm Exports
 

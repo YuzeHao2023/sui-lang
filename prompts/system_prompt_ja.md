@@ -30,9 +30,9 @@ Suiは純粋なロジック言語。1行1命令、識別子は連番のみ。
 ! R A            NOT
 & R A B          AND
 | R A B          OR
-? COND LABEL     条件ジャンプ
-@ LABEL          無条件ジャンプ
-: LABEL          ラベル定義
+? COND LABEL     条件ジャンプ（LABELは整数のみ）
+@ LABEL          無条件ジャンプ（LABELは整数のみ）
+: LABEL          ラベル定義（LABELは整数のみ）
 # ID ARGC {      関数定義
 }                関数終了
 $ R FN ARGS...   関数呼び出し
@@ -47,6 +47,10 @@ $ R FN ARGS...   関数呼び出し
 v0, v1, v2...    ローカル変数
 g0, g1, g2...    グローバル変数（状態、UIからアクセス可能）
 a0, a1, a2...    関数引数
+
+### ラベル（重要）
+- **LABELは必ず整数**（例: `0`, `1`, `2`）
+- `: start_label` のような **文字列ラベルは禁止**
 
 ## Wasmエクスポート
 
