@@ -1,5 +1,5 @@
 """
-Minimal internal representation (S-IR) for Isu.
+Minimal internal representation (IIR) for Isu.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ class Program:
     steps: Stmt
 
     def to_json(self) -> dict[str, Any]:
-        """Convert to a JSON-serializable S-IR dict."""
+        """Convert to a JSON-serializable IIR dict."""
         return {
             "meta": {k: self.meta[k] for k in sorted(self.meta.keys())},
             "func": {k: self.func[k] for k in sorted(self.func.keys())},

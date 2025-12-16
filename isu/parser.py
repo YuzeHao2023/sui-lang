@@ -1,5 +1,5 @@
 """
-Parse Isu text into S-IR (AST).
+Parse Isu text into IIR (AST).
 
 v0 supports only a minimal subset:
 - Sections: META/FUNC/IO/STATE/LOCAL/STEPS

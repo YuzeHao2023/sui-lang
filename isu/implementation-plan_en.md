@@ -3,8 +3,8 @@
 ## Goals
 
 - The LLM generates **Isu (structured pseudocode)** from human natural-language instructions.
-- Isu is **parsed deterministically** into **S-IR (AST)**.
-- S-IR is compiled to **any execution target** (prioritize existing foundations such as Python / Wasm / LLVM IR first).
+- Isu is **parsed deterministically** into **IIR (AST)**.
+- IIR is compiled to **any execution target** (prioritize existing foundations such as Python / Wasm / LLVM IR first).
 - On failure, roll back to Isu and run a **repair loop** (everything after IR is deterministic in principle).
 
 ---
@@ -15,7 +15,7 @@
 [User NL]
    |
    v
-[LLM] --(Isu text)--> [Parser] --(S-IR JSON AST)--> [Compiler] --> [Backend Runtime]
+[LLM] --(Isu text)--> [Parser] --(IIR JSON AST)--> [Compiler] --> [Backend Runtime]
    ^                          |                              |
    |                          v                              v
    +------(errors/spec)--- [Validator] ------------------ [Test/Trace]
@@ -24,7 +24,7 @@
 ### Layer responsibilities
 
 - **Isu (text)**: the primary artifact that the LLM reads/writes
-- **S-IR (JSON AST)**: a deterministic internal representation that corresponds 1:1 with Isu
+- **IIR (JSON AST)**: a deterministic internal representation that corresponds 1:1 with Isu
 - **Backend**: Python / Wasm / LLVM IR, etc. Consider a dedicated VM only if needed later.
 
 ---
@@ -33,7 +33,7 @@
 
 ### 1. Determinism
 
-- Isu → S-IR must be uniquely determined.
+- Isu → IIR must be uniquely determined.
 - Eliminate ambiguity in grammar, lexing, scoping, and type inference.
 - Where ambiguity is needed, **require explicit syntax** (e.g., make `ELSE:` mandatory).
 
@@ -166,12 +166,12 @@ Notes:
 ### 0.2 Parser
 
 - Build an **official grammar** using PEG or Lark/ANTLR, and manage it in a form usable for both:
-  - Parsing (Isu → S-IR)
+  - Parsing (Isu → IIR)
   - Constraining LLM output later (grammar-constrained decoding)
 
 Output:
 
-- Always produce `S-IR (JSON)`.
+- Always produce `IIR (JSON)`.
 - Pretty-print the IR back to Isu (round-trip formatting) from the beginning.
 - Always run **canonicalization** after parsing; all subsequent processing targets canonical form only:
   - Expand `{}` blocks into `BEGIN/END`
@@ -188,7 +188,7 @@ Output:
 
 ### 0.4 Backend (interpreter first, then Python)
 
-- Implement an **S-IR interpreter** in v0; prioritize correct execution and tracing.
+- Implement an **IIR interpreter** in v0; prioritize correct execution and tracing.
 - Map runtime exceptions back to Isu Step IDs (critical).
 - Introduce Python backend (AST generation or source generation) after v0 as needed.
 
@@ -197,8 +197,8 @@ Output:
 Before Phase 1, implement a minimal patch applier in v0.
 
 - Support only `REPLACE <StepID>:`.
-- Apply patches **after converting to S-IR** (more deterministic and less fragile than text editing).
-- Allow Isu fragments as patch bodies; parse only the fragment, canonicalize to S-IR, then replace the target step.
+- Apply patches **after converting to IIR** (more deterministic and less fragile than text editing).
+- Allow Isu fragments as patch bodies; parse only the fragment, canonicalize to IIR, then replace the target step.
 - After replacement, always run the pretty-printer so canonical Isu can be returned.
 - Re-run validator after applying patches.
 
@@ -272,12 +272,12 @@ Principles:
 
 ### 3.1 Wasm
 
-- Compile S-IR → Wasm (WAT or binary)
+- Compile IIR → Wasm (WAT or binary)
 - Start with an integer/array/loop-centric subset
 
 ### 3.2 LLVM IR
 
-- Generate LLVM IR from S-IR
+- Generate LLVM IR from IIR
 - SSA conversion happens in the compiler (Isu does not require SSA)
 
 ---
@@ -288,7 +288,7 @@ Principles:
 isu/
   spec/
     isu.ebnf
-    sir.schema.json
+    iir.schema.json
     stdlib.md
   isu/
     parser/
@@ -341,7 +341,7 @@ isu/
 
 - Start with minimal regex constraints
 - Then introduce grammar-constrained decoding using EBNF/PEG
-- Keep JSON Schema direct S-IR generation as an option (but Isu remains primary)
+- Keep JSON Schema direct IIR generation as an option (but Isu remains primary)
 
 ### Prompt policy (high-level)
 
@@ -385,13 +385,13 @@ Isu is designed to take LLM output into a deterministically executable intermedi
 
 ### 1) JSON Schema / Function Calling / Structured Outputs
 
-- **Summary**: force LLM outputs to match a JSON schema; close to direct S-IR generation.
+- **Summary**: force LLM outputs to match a JSON schema; close to direct IIR generation.
 - **Strength**: greatly reduces unparsable outputs; validation becomes simpler.
 - **Isu advantage**:
   - easier to keep a human-reviewable primary artifact
   - step-level patch workflow is natural
 - **When Isu is less advantageous**:
-  - if a human-readable intermediate artifact is unnecessary, direct S-IR (JSON) generation can be simpler
+  - if a human-readable intermediate artifact is unnecessary, direct IIR (JSON) generation can be simpler
 
 ### 2) Grammar-constrained decoding (EBNF/CFG)
 
@@ -455,12 +455,12 @@ References:
 
 ### 1. Golden tests
 
-- Isu → S-IR → Isu (pretty-print) round-trip equivalence
+- Isu → IIR → Isu (pretty-print) round-trip equivalence
 - Isu → execution (v0: interpreter) expected outputs
 
 ### 2. Property tests
 
-- Generate random S-IR, lower to Isu, re-parse, and check equivalence
+- Generate random IIR, lower to Isu, re-parse, and check equivalence
 - Verify correct exceptions for loop bounds and out-of-range indexing
 
 ### 3. Round-trip evaluation (future)
@@ -471,14 +471,14 @@ References:
 
 ## Success metrics (measure early)
 
-- **Determinism**: identical input Isu always yields identical S-IR (byte-level serialized equality)
+- **Determinism**: identical input Isu always yields identical IIR (byte-level serialized equality)
 - **Trace alignment**: most runtime errors can be pinpointed via “Step ID + variable name + type/value”
 - **Repair efficiency**: continuously measure how often 1–2 patches make tests pass; if it degrades, revisit spec/validator/stdlib
 
 ## Most important points in this approach
 
 - **The LLM only touches Isu**
-- **Isu → S-IR is 100% deterministic**
-- **S-IR → executable code is also deterministic**
+- **Isu → IIR is 100% deterministic**
+- **IIR → executable code is also deterministic**
 - On failure, **return to the Isu level and repair**
 - Enforce “closed vocabulary” and “minimal structure” to avoid giving the model excessive freedom

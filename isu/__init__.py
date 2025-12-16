@@ -2,7 +2,7 @@
 Isu (structured pseudocode) implementation.
 
 This package provides the minimal v0 pipeline:
-- Deterministic parsing from Isu text to S-IR (JSON-compatible AST)
+- Deterministic parsing from Isu text to IIR (JSON-compatible AST)
 - Canonicalization (e.g., AUTO_ID)
 - Pretty-printing back to canonical Isu
 """
